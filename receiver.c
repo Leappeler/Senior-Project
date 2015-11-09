@@ -44,11 +44,11 @@ delay(500);
 
 
 // NEED TO SET PINS
-int a = 13; 		// Pin for tremolo
-int b =  12;		// Pin for Flange
-int c = 11;			// Pin for both effects
-int d = 0; 			// Relay D
-int e = 0; 			// Relay E
+int a = 2; 			// Pin for tremolo
+int b = 3;			// Pin for Flange
+int c = 4;			// Pin for both effects
+int d = 5; 			// Relay D
+int e = 6; 			// Relay E
 int effect = 0;		// Effect variable
 int fl = 0; 		// Flag variable
 
@@ -133,6 +133,7 @@ void loop() {
  			}
  		}
 
+ 		// Input 2 sets Flange only
  		case '2': {
  			digitalWrite(a, OPEN);
  			digitalWrite(b, CLOSED);
@@ -146,6 +147,7 @@ void loop() {
  			}
  		}
 
+ 		// Input 3 sets both effects
  		case '3': {
  			digitalWrite(a, CLOSED);
  			digitalWrite(b, OPEN);
