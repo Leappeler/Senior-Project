@@ -81,13 +81,31 @@ void loop() {
 ///////////////////////////////////////////////////////////////////////////////////////////////
 Code that needs to be combined for the Receiver
 
-int ledPin = 13; 	//Test
-int st = 0;			//State variable
-int fl = 0; 		//Flag variable
+SET PINS TO WHAT THEY NEED TO BE
+
+int a = 13; 		// Pin for tremolo
+int b =  12;		// Pin for Flange
+int c = 11;			// Pin for both effects
+int d = 0; 			// Relay D
+int e = 0; 			// Relay E
+int effect = 0;		// Effect variable
+int fl = 0; 		// Flag variable
  
 void setup() {
- pinMode(ledPin, OUTPUT);
- digitalWrite(ledPin, LOW);
+ pinMode(a, OUTPUT);
+ pinMode(b, OUTPUT);
+ pinMode(c, OUTPUT);
+ pinMode(d, OUTPUT);
+ pinMode(e, OUTPUT);
+
+
+// Set all relays to open when starting out
+ digitalWrite(a, LOW);
+ digitalWrite(b, LOW);
+ digitalWrite(c, LOW);
+ digitalWrite(d, LOW);
+ digitalWrite(e, LOW);
+
  
  Serial.begin(9600); // Default connection rate for my BT module
 }
@@ -95,23 +113,47 @@ void setup() {
 void loop() {
 
  if(Serial.available() > 0){
- st = Serial.read();
- fl = 0;
+ 	effect = Serial.read();
+ 	fl = 0;			
  }
 
- if (st == '0') {
- digitalWrite(ledPin, LOW);
- if(fl == 0){
- Serial.println("LED: off");
- fl = 1;
- }
+ switch (effect){
+
+ 	// Input 0 clears effects
+ 	case '0': {
+ 		digitalWrite(tremolo, LOW);
+
+ 		if(fl == 0){	
+ 			Serial.println("Effects cleared");
+ 			fl = 1;		
+ 		}
+ 	}
+
  }
 
- else if (st == '1') {
- digitalWrite(ledPin, HIGH);
- if(fl == 0){
- Serial.println("LED: on");
- fl = 1;
+
+
+
+
+
+
+ if (effect == '0') {
+ 	digitalWrite(tremolo, LOW);
+ 	if(fl == 0){	
+ 		Serial.println("LED: off");
+ 		fl = 1;		
+ 	}
  }
+
+ else if (effect == '1') {
+ 	digitalWrite(tremolo, HIGH);
+ 	if(fl == 0){
+ 		Serial.println("LED: on");
+ 		fl = 1;		//Added to debug code
+ 	}
  }
+
+ //Let's make a case statement
+
+
 }
