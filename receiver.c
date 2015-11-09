@@ -1,3 +1,5 @@
+
+
 /*********************************************************************
 This is an example for our Monochrome OLEDs based on SSD1306 drivers
 
@@ -38,9 +40,7 @@ All text above, and the splash screen must be included in any redistribution
 #define OPEN HIGH
 Adafruit_SSD1306 display(OLED_RESET);
 
-//The following adafruit display is to comply with licensing.
-display.display();
-delay(500);
+
 
 
 // NEED TO SET PINS
@@ -60,6 +60,10 @@ void setup()   {
 
 	// Screen init
   	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
+  
+        //The following adafruit display is to comply with licensing.
+        display.display();
+        delay(1000);
   	
   
   	// Set all relay pins to outputs
@@ -97,7 +101,6 @@ void setup()   {
 void loop() {
 	//Possibly add an empty while loop for when no input?
 
-
  	if(Serial.available() > 0){
  		effect = Serial.read();
  		fl = 0;			
@@ -117,7 +120,8 @@ void loop() {
  				Serial.println("Clean");
  				fl = 1;		
  			}
- 		}
+            break;		
+        }
 
  		// Input 1 sets Tremolo only
  		case '1': {
@@ -131,6 +135,7 @@ void loop() {
  				Serial.println("Tremolo");
  				fl = 1;		
  			}
+            break;
  		}
 
  		// Input 2 sets Flange only
@@ -145,6 +150,7 @@ void loop() {
  				Serial.println("Flange");
  				fl = 1;		
  			}
+            break;
  		}
 
  		// Input 3 sets both effects
@@ -159,6 +165,7 @@ void loop() {
  				Serial.println("Both Effects");
  				fl = 1;		
  			}
+            break;
  		}
  	
  		default: {
@@ -166,6 +173,7 @@ void loop() {
  				Serial.println("Invalid. Enter 0-3");
  				fl = 1;
  			}
+            break;
  		}
  	}  //End switch
 
