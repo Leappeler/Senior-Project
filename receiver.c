@@ -34,55 +34,16 @@ All text above, and the splash screen must be included in any redistribution
 #include <Adafruit_SSD1306.h>
 
 #define OLED_RESET 4
+#define CLOSED LOW
+#define OPEN HIGH
 Adafruit_SSD1306 display(OLED_RESET);
 
 //The following adafruit display is to comply with licensing.
 display.display();
-delay(1000);
+delay(500);
 
 
-void setup()   {                
-  Serial.begin(9600);
-
-  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
-  // init done
-  
-  // Show image buffer on the display hardware.
-  // Since the buffer is intialized with an Adafruit splashscreen
-  // internally, this will display the splashscreen.
-
-
-  // Clear the buffer.
-  display.clearDisplay();
-
-  
-  // text display tests
-  display.setTextSize(2);		//	Sets larger font
-  display.setTextColor(WHITE);	//	Doesn't matter too much. Color decided by location
-  display.setCursor(0,16);		//	Sets cursor below yellow part of display
-  display.println("Flange");	//	Display Flange
-  display.setTextSize(2);		//	Same size as before
-  display.setTextColor(WHITE);	//	Doesn't matter too much. Color decided by location
-  display.println("Tremolo");	//	Tremolo
-  display.display();
-  delay(2000);
-
-
-
-}
-
-void loop() {
-  
-  
-}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////
-Code that needs to be combined for the Receiver
-
-SET PINS TO WHAT THEY NEED TO BE
-
+// NEED TO SET PINS
 int a = 13; 		// Pin for tremolo
 int b =  12;		// Pin for Flange
 int c = 11;			// Pin for both effects
@@ -90,70 +51,120 @@ int d = 0; 			// Relay D
 int e = 0; 			// Relay E
 int effect = 0;		// Effect variable
 int fl = 0; 		// Flag variable
- 
-void setup() {
- pinMode(a, OUTPUT);
- pinMode(b, OUTPUT);
- pinMode(c, OUTPUT);
- pinMode(d, OUTPUT);
- pinMode(e, OUTPUT);
 
 
-// Set all relays to open when starting out
- digitalWrite(a, LOW);
- digitalWrite(b, LOW);
- digitalWrite(c, LOW);
- digitalWrite(d, LOW);
- digitalWrite(e, LOW);
+void setup()   {  
 
- 
- Serial.begin(9600); // Default connection rate for my BT module
+	//Begin Serial comms at default of BT device
+	Serial.begin(9600);
+
+	// Screen init
+  	display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
+  	
+  
+  	// Set all relay pins to outputs
+	pinMode(a, OUTPUT);
+ 	pinMode(b, OUTPUT);
+ 	pinMode(c, OUTPUT);
+ 	pinMode(d, OUTPUT);
+ 	pinMode(e, OUTPUT);
+
+
+	// Set all relays to open when starting out
+	// The relays are active low. Set pins high to turn them off.
+ 	digitalWrite(a, OPEN);
+ 	digitalWrite(b, OPEN);
+ 	digitalWrite(c, OPEN);
+ 	digitalWrite(d, OPEN);
+ 	digitalWrite(e, OPEN);
+
+  	// Clear the display
+  	display.clearDisplay();
+
+  	// Display 
+  	display.setTextSize(2);			//	Sets larger font
+  	display.setTextColor(WHITE);	//	Doesn't matter too much. Color decided by location
+  	display.setCursor(0,16);		//	Sets cursor below yellow part of display
+  	display.println("Flange");		//	Display Flange
+  	display.setTextSize(2);			//	Same size as before
+  	display.setTextColor(WHITE);	//	Doesn't matter too much. Color decided by location
+  	display.println("Tremolo");		//	Tremolo
+ 	display.display();
+  	delay(1000);
+
 }
  
 void loop() {
+	//Possibly add an empty while loop for when no input?
 
- if(Serial.available() > 0){
- 	effect = Serial.read();
- 	fl = 0;			
- }
 
- switch (effect){
+ 	if(Serial.available() > 0){
+ 		effect = Serial.read();
+ 		fl = 0;			
+ 	}
 
- 	// Input 0 clears effects
- 	case '0': {
- 		digitalWrite(tremolo, LOW);
+	switch (effect){
+	
+	// Input 0 clears effects
+ 		case '0': {
+ 			digitalWrite(a, OPEN);
+ 			digitalWrite(b, OPEN);
+ 			digitalWrite(c, OPEN);
+ 			digitalWrite(d, OPEN);
+ 			digitalWrite(e, CLOSED);
 
- 		if(fl == 0){	
- 			Serial.println("Effects cleared");
- 			fl = 1;		
+ 			if(fl == 0){	
+ 				Serial.println("Clean");
+ 				fl = 1;		
+ 			}
  		}
- 	}
+
+ 		// Input 1 sets Tremolo only
+ 		case '1': {
+ 			digitalWrite(a, CLOSED);
+ 			digitalWrite(b, OPEN);
+ 			digitalWrite(c, OPEN);
+ 			digitalWrite(d, CLOSED);
+ 			digitalWrite(e, OPEN);
+
+ 			if(fl == 0){	
+ 				Serial.println("Tremolo");
+ 				fl = 1;		
+ 			}
+ 		}
+
+ 		case '2': {
+ 			digitalWrite(a, OPEN);
+ 			digitalWrite(b, CLOSED);
+ 			digitalWrite(c, OPEN);
+ 			digitalWrite(d, OPEN);
+ 			digitalWrite(e, OPEN);
+
+ 			if(fl == 0){	
+ 				Serial.println("Flange");
+ 				fl = 1;		
+ 			}
+ 		}
+
+ 		case '3': {
+ 			digitalWrite(a, CLOSED);
+ 			digitalWrite(b, OPEN);
+ 			digitalWrite(c, CLOSED);
+ 			digitalWrite(d, OPEN);
+ 			digitalWrite(e, OPEN);
+
+ 			if(fl == 0){	
+ 				Serial.println("Both Effects");
+ 				fl = 1;		
+ 			}
+ 		}
+ 	
+ 		default: {
+ 			if(fl == 0){	
+ 				Serial.println("Invalid. Enter 0-3");
+ 				fl = 1;
+ 			}
+ 		}
+ 	}  //End switch
 
  }
-
-
-
-
-
-
-
- if (effect == '0') {
- 	digitalWrite(tremolo, LOW);
- 	if(fl == 0){	
- 		Serial.println("LED: off");
- 		fl = 1;		
- 	}
- }
-
- else if (effect == '1') {
- 	digitalWrite(tremolo, HIGH);
- 	if(fl == 0){
- 		Serial.println("LED: on");
- 		fl = 1;		//Added to debug code
- 	}
- }
-
- //Let's make a case statement
-
-
-}
