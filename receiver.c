@@ -49,8 +49,9 @@ int b = 3;          // Pin for Flange
 int c = 4;          // Pin for both effects
 int d = 5;          // Relay D
 int e = 6;          // Relay E
-int effect = 0;     // Effect variable
 int fl = 0;         // Flag variable
+char character = '\0';
+String effect = "";
 
 void setup()   {  
 
@@ -99,87 +100,69 @@ void setup()   {
  
 void loop() {
     //Possibly add an empty while loop for when no input?
-    while (Serial.available()) {
-        delay(100);
+  effect = "";
+  character = '\0';
 
-        if(Serial.available() > 0){
-           effect = Serial.read();
-           fl = 0;
-        Serial.print(effect); 
-        }
+  while(Serial.available()) {
+      character = Serial.read();
+      effect.concat(character);
+      delay(50);      // Added delay or the string would not concat. 
+  }
 
-        if (effect < '0' && effect > '3'){
-           continue;
-        }
-
-        if (effect >= '0' && effect < '4'){
-            switch (effect){
-    
-    
-            // Input 0 clears effects
-            case '0': {
-                digitalWrite(a, OPEN);
-                digitalWrite(b, OPEN);
-                digitalWrite(c, OPEN);
-                digitalWrite(d, OPEN);
-                digitalWrite(e, CLOSED);
-                delay(1000);
-                if(fl == 0){    
-                   Serial.println("Clean\n");
-                   fl = 1;      
-                }
-                break;      
-            }
-
-
-            // Input 1 sets Tremolo only
-            case '1': {
-                digitalWrite(a, CLOSED);
-                digitalWrite(b, OPEN);
-                digitalWrite(c, OPEN);
-                digitalWrite(d, CLOSED);
-                digitalWrite(e, OPEN);
-                delay(1000);
-                if(fl == 0){    
-                   Serial.println("Tremolo\n");
-                   fl = 1;      
-                }
-                break;
-            }
-
-
-            // Input 2 sets Flange only
-            case '2': {
-                digitalWrite(a, OPEN);
-                digitalWrite(b, CLOSED);
-                digitalWrite(c, OPEN);
-                digitalWrite(d, OPEN);
-                digitalWrite(e, OPEN);
-                delay(1000);
-                if(fl == 0){    
-                   Serial.println("Flange\n");
-                   fl = 1;      
-                }
-                break;
-            }
-
-
-            // Input 3 sets both effects
-                case '3': {
-                    digitalWrite(a, CLOSED);
-                    digitalWrite(b, OPEN);
-                    digitalWrite(c, CLOSED);
-                    digitalWrite(d, OPEN);
-                    digitalWrite(e, OPEN);
-                    delay(1000);
-                    if(fl == 0){    
-                        Serial.println("Both Effects\n");
-                        fl = 1;      
-                    }
-                
-                break;
-                }
-            }  //End switch     
-        }
+  if (effect != "") {
+    Serial.println(effect);
+  }
+  
+  if (effect == "*12|99|99|0#"){
+    digitalWrite(a, OPEN);
+    digitalWrite(b, OPEN);
+    digitalWrite(c, OPEN);
+    digitalWrite(d, OPEN);
+    digitalWrite(e, CLOSED);
+    if(fl == 0){    
+      Serial.println("Clean\n");
+      fl = 1;      
     }
+  }
+
+  if (effect == "*12|99|99|1#"){
+    digitalWrite(a, CLOSED);
+    digitalWrite(b, OPEN);
+    digitalWrite(c, OPEN);
+    digitalWrite(d, CLOSED);
+    digitalWrite(e, OPEN);
+    if(fl == 0){    
+      Serial.println("Tremolo\n");
+      fl = 1;      
+    }
+  }
+
+  if (effect == "*12|99|99|2#"){
+    digitalWrite(a, OPEN);
+    digitalWrite(b, CLOSED);
+    digitalWrite(c, OPEN);
+    digitalWrite(d, OPEN);
+    digitalWrite(e, OPEN);
+    if(fl == 0){    
+      Serial.println("Flange\n");
+      fl = 1;      
+    }
+  }
+
+  if (effect == "*12|99|99|3#"){
+    digitalWrite(a, CLOSED);
+    digitalWrite(b, OPEN);
+    digitalWrite(c, CLOSED);
+    digitalWrite(d, OPEN);
+    digitalWrite(e, OPEN);
+    if(fl == 0){    
+      Serial.println("Both Effects\n");
+      fl = 1;      
+    }
+  }
 }
+
+            
+
+
+        
