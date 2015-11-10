@@ -22,13 +22,14 @@ All text above, and the splash screen must be included in any redistribution
 //  license. 
 
 
+// TODO
+// Add comments
+
+
 
 
 //  Jacob Turcotte and Samuel Wallace
 //  Receiver program
-//  At this moment in time, the display works. Figuring out how to
-//  make each word (Flange), (Tremolo), (Flange + Tremolo) work. 
-//  Possibly display both and just highlight the ones that are present?
 
 #include <SPI.h>
 #include <Wire.h>
@@ -44,14 +45,14 @@ Adafruit_SSD1306 display(OLED_RESET);
 
 
 // NEED TO SET PINS
-int a = 2;          // Pin for tremolo
-int b = 3;          // Pin for Flange
-int c = 4;          // Pin for both effects
-int d = 5;          // Relay D
-int e = 6;          // Relay E
-int fl = 0;         // Flag variable
-char character = '\0';
-String effect = "";
+int a = 2;          	// Pin for tremolo
+int b = 3;          	// Pin for Flange
+int c = 4;          	// Pin for both effects
+int d = 5;          	// Relay D
+int e = 6;          	// Relay E
+int fl = 0;         	// Flag variable
+char character = '\0';	// Used when reading in data
+String effect = "";		// Stores state of device
 
 void setup()   {  
 
@@ -59,7 +60,7 @@ void setup()   {
     Serial.begin(9600);
 
     // Screen init
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 128x64)
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C
   
     //The following adafruit display is to comply with licensing.
     display.display();
@@ -86,80 +87,155 @@ void setup()   {
     display.clearDisplay();
 
     // Display 
-    display.setTextSize(2);         //  Sets larger font
-    display.setTextColor(WHITE);    //  Doesn't matter too much. Color decided by location
-    display.setCursor(0,16);        //  Sets cursor below yellow part of display
-    display.println("Flange");      //  Display Flange
-    display.setTextSize(2);         //  Same size as before
-    display.setTextColor(WHITE);    //  Doesn't matter too much. Color decided by location
-    display.println("Tremolo");     //  Tremolo
+    display.setTextSize(2);         	//  Sets larger font
+    display.setTextColor(WHITE);    	//  Doesn't matter too much. Color decided by location
+    display.setCursor(0,16);        	//  Sets cursor below yellow part of display
+    display.println(" Flange ");    	//  Display Flange
+    display.setTextSize(2);         	//  Same size as before
+    display.setTextColor(WHITE);    	//  Doesn't matter too much. Color decided by location
+    display.println(" Tremolo");    	//  Tremolo
     display.display();
-    delay(1000);
+    delay(500);
 
 }
  
 void loop() {
-    //Possibly add an empty while loop for when no input?
-  effect = "";
-  character = '\0';
-
-  while(Serial.available()) {
-      character = Serial.read();
-      effect.concat(character);
-      delay(50);      // Added delay or the string would not concat. 
-  }
-
-  if (effect != "") {
-    Serial.println(effect);
-  }
   
-  if (effect == "*12|99|99|0#"){
-    digitalWrite(a, OPEN);
-    digitalWrite(b, OPEN);
-    digitalWrite(c, OPEN);
-    digitalWrite(d, OPEN);
-    digitalWrite(e, CLOSED);
-    if(fl == 0){    
-      Serial.println("Clean\n");
-      fl = 1;      
-    }
-  }
+	//Reset variables needed
+	effect = "";						// Sets effect to empty for new data
+	character = '\0';					// Sets character to NULL to make sure data will not be corrupt
 
-  if (effect == "*12|99|99|1#"){
-    digitalWrite(a, CLOSED);
-    digitalWrite(b, OPEN);
-    digitalWrite(c, OPEN);
-    digitalWrite(d, CLOSED);
-    digitalWrite(e, OPEN);
-    if(fl == 0){    
-      Serial.println("Tremolo\n");
-      fl = 1;      
-    }
-  }
+  // Read in data
+	while(Serial.available()) {
+		character = Serial.read();
+		effect.concat(character);		// Chars are read in by read() and then added to effect string
+		delay(75);      				// Added delay or the string would not concat. 
+	}
+	fl = 0;								// Sets flag so it doesn't send information multiple times
 
-  if (effect == "*12|99|99|2#"){
+ // if (effect != "") {
+ //   Serial.println(effect);
+ // }
+  
+
+  // Input of 0 will turn off all effects
+	if (effect == "*12|99|99|0#" || effect == "0"){
+
+
+  		//Screen
+		display.clearDisplay();
+		display.setTextSize(2);         
+		display.setTextColor(WHITE);    	// Normal because effect off
+		display.setCursor(0,16);        
+		display.println(" Flange ");    
+		display.setTextSize(2);         
+		display.setTextColor(WHITE);    	// Normal because effect off
+		display.println(" Tremolo");   
+		display.display();
+    
+		// Relays
+		digitalWrite(a, OPEN);
+		digitalWrite(b, OPEN);
+		digitalWrite(c, OPEN);
+		digitalWrite(d, OPEN);
+		digitalWrite(e, CLOSED);
+    
+		// Prints back effect
+		if(fl == 0){    
+			Serial.println("Clean\n");
+			fl = 1;      
+		}
+	}
+  
+
+  // Input of 1 will turn on Flange effect
+  if (effect == "*12|99|99|1#" || effect == "1"){
+
+  	// Display
+    display.clearDisplay();
+    display.setTextSize(2);         
+    display.setTextColor(BLACK, WHITE);	// Inverted Flange to show effect is on
+    display.setCursor(0,16);        
+    display.println(" Flange ");      
+    display.setTextSize(2);
+    display.setTextColor(WHITE);    	// Normal because effect is off
+    display.println(" Tremolo");
+    display.display();
+    
+    // Relays
     digitalWrite(a, OPEN);
     digitalWrite(b, CLOSED);
     digitalWrite(c, OPEN);
     digitalWrite(d, OPEN);
     digitalWrite(e, OPEN);
+    
+    // Prints back active effect
     if(fl == 0){    
       Serial.println("Flange\n");
       fl = 1;      
     }
   }
 
-  if (effect == "*12|99|99|3#"){
+
+  // Input of 2 will turn on both effects
+  if (effect == "*12|99|99|2#" || effect == "2"){
+
+  	// Display
+    display.clearDisplay();
+    display.setTextSize(2);         
+    display.setTextColor(BLACK, WHITE);	// Inverted to show effect is active
+    display.setCursor(0,16);        
+    display.println(" Flange ");      
+    display.setTextSize(2);         
+    display.setTextColor(BLACK, WHITE);	// Inverted to show effect is active
+    display.println(" Tremolo");     
+    display.display();
+    
+    // Relays
     digitalWrite(a, CLOSED);
     digitalWrite(b, OPEN);
     digitalWrite(c, CLOSED);
     digitalWrite(d, OPEN);
     digitalWrite(e, OPEN);
+    
+    // Prints back active effects
     if(fl == 0){    
       Serial.println("Both Effects\n");
       fl = 1;      
     }
   }
+  
+
+  // Input of 3 will turn on Tremolo effect
+  if (effect == "*12|99|99|3#" || effect == "3"){
+  	
+  	// Display
+    display.clearDisplay();
+    display.setTextSize(2);            //  Sets larger font
+    display.setTextColor(WHITE);  
+    display.setCursor(0,16);            //  Sets cursor below yellow part of display
+    display.println(" Flange ");          //  Display Flange
+    display.setTextSize(2);             //  Same size as before
+    display.setTextColor(BLACK, WHITE);        //  Doesn't matter too much. Color decided by location
+    display.println(" Tremolo");         //  Tremolo
+    display.display();
+    
+    // Relays
+    digitalWrite(a, CLOSED);
+    digitalWrite(b, OPEN);
+    digitalWrite(c, OPEN);
+    digitalWrite(d, CLOSED);
+    digitalWrite(e, OPEN);
+    
+    // Print back active effects
+    if(fl == 0){    
+      Serial.println("Tremolo\n");
+      fl = 1;      
+    }
+  }
+
+  
+
 }
 
             
