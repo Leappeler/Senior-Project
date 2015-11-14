@@ -1,0 +1,7 @@
+# Jacob Turcotte and Samuel Wallace
+# Files to ignore 
+
+*.bin
+DSP
+*.o
+./TestingBoard
