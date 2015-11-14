@@ -4,4 +4,4 @@
 *.bin
 DSP
 *.o
-./TestingBoard
+TestingBoard
