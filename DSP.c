@@ -1,9 +1,10 @@
 /*
- * Example program to illustrate the use of the ECE 486 interface.
+ * Jacob Turcotte and Samuel Wallace
  * 
- * An input waveform is squared, and streamed to the output DAC.  The 
- * waveform is also copied (unchanged) to the other DAC channel.  Each
- * USER button press inverts the signal on the second DAC.
+ * This program will be on the board that handles the FLANGE effect.
+ * The two ADC's will handle reading in a pot and the input signal.
+ * The two DAC's will output the flanged input signal and just what is added to the input signal.
+ * The second part of that will be done much for curiosity. 
  */
 
 #include "stm32f4xx_hal.h"
@@ -22,15 +23,33 @@
 #include <stdio.h>
 #include <math.h>
 
+/*
+ * Prototypes
+ */
+
+// Personal note: See Arraypractice.c for help if you get confused.
+float timekeeper(float* a, float val, int *hindex, int delay);
+
+
 int main(void)
 {
-  int nsamp, i;
-  float *input, *output1, *output2;
-  static float sign=1.0;
+
+  /*
+   * Declares here
+   * Add input1 and input2 when doing final. For now just make the delay work.
+   */
+
+  int nsamp, i, index = 0, delay;
+  float *input, *output1, *output2, *history, dval;
   static int button_count = 0;
   char outstr[100];
+ 
 
-  initialize(FS_50K, MONO_IN, STEREO_OUT); 	// Set up the DAC/ADC interface
+  /*
+   * Initializes the board to use one input in, two out, and use a 
+   * sampling frequency of 50ksps
+   */
+  initialize(FS_50K, MONO_IN, STEREO_OUT);
   
   /*
    * Allocate Required Memory
@@ -40,12 +59,16 @@ int main(void)
   input = (float *)malloc(sizeof(float)*nsamp);
   output1 = (float *)malloc(sizeof(float)*nsamp);
   output2 = (float *)malloc(sizeof(float)*nsamp);
-  
-  if (input==NULL || output1==NULL || output2==NULL) {
+  history = (float *)malloc(sizeof(float)*12000);
+
+  if (input==NULL || output1==NULL || output2==NULL || history == NULL) {
     flagerror(MEMORY_ALLOCATION_ERROR);
     while(1);
   }
   
+  for (i = 0; i < 12000; i++){
+    history[i] = 0;
+  }
   /*
    * Infinite Loop to process the data stream, "nsamp" samples at a time
    */
@@ -63,8 +86,12 @@ int main(void)
     
     DIGITAL_IO_SET(); 	// Use a scope on PC4 to measure execution time
     for (i=0; i<nsamp; i++) {
+
+      delay = 5;
+      dval = timekeeper(history, input[i], &index, delay);
       output1[i] = input[i];
-      output2[i] = 2 * input[i];
+      output2[i] = dval;
+      //output2[i] = input[i];
     }  
     DIGITAL_IO_RESET();	// (falling edge....  done processing data )
     
@@ -72,16 +99,39 @@ int main(void)
      * pass the processed working buffer back for DAC output
      */
     putblockstereo(output1, output2);
-    
-//    if(UserButtonPressed==Button_Pressed) {		// Button Press?
-//      
-//      sign *= -1.0;					// Invert output2
-//      
-//      UserButtonPressed = Button_Ready;
-//
-//      sprintf(outstr,"Button Pressed!  count = %x\n",button_count++); // %d, %f seem to be buggy
-//      UART_putstr(outstr);
-//      
-//    }
   }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * User defined functions
+ */
+
+
+
+float timekeeper(float *a, float val, int *hindex, int delay)
+{
+
+  // Delayed index is equal to the current history index minus time delay (5 * 500 = 2500)
+  int dindex = *hindex - (delay * 500);
+
+  //turns negative index to one on end of array
+  if (dindex < 0) {
+    dindex += 12000;
+  }
+
+  //Takes care of null case
+  if (dindex == 12000){
+    dindex = 0;
+  }
+
+
+
+  a[*hindex] = val;
+  *hindex += 1;
+
+  return a[dindex];
 }
