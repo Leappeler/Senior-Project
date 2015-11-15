@@ -28,7 +28,7 @@
  */
 
 // Personal note: See Arraypractice.c for help if you get confused.
-float timekeeper(float* a, float val, int *hindex, int delay);
+int timekeeper(float* a, float val, int *hindex, int delay, float* k);
 
 
 int main(void)
@@ -87,8 +87,8 @@ int main(void)
     DIGITAL_IO_SET(); 	// Use a scope on PC4 to measure execution time
     for (i=0; i<nsamp; i++) {
 
-      delay = 5;
-      dval = timekeeper(history, input[i], &index, delay);
+      delay = 15;
+      timekeeper(history, input[i], &index, delay, &dval);
       output1[i] = input[i];
       output2[i] = dval;
       //output2[i] = input[i];
@@ -99,6 +99,13 @@ int main(void)
      * pass the processed working buffer back for DAC output
      */
     putblockstereo(output1, output2);
+
+    for (i = 0; i  < nsamp; i++){
+      output1[i] = 0;
+      output2[i] = 0;
+      input[i] = 0;  
+    
+    }
   }
 }
 
@@ -112,7 +119,7 @@ int main(void)
 
 
 
-float timekeeper(float *a, float val, int *hindex, int delay)
+int timekeeper(float *a, float val, int *hindex, int delay, float* k)
 {
 
   // Delayed index is equal to the current history index minus time delay (5 * 500 = 2500)
@@ -133,5 +140,6 @@ float timekeeper(float *a, float val, int *hindex, int delay)
   a[*hindex] = val;
   *hindex += 1;
 
-  return a[dindex];
+  *k = a[dindex];
+  return 0;
 }
