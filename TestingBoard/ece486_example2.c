@@ -41,10 +41,10 @@ int main(void)
   output1 = (float *)malloc(sizeof(float)*nsamp);
   output2 = (float *)malloc(sizeof(float)*nsamp);
   
- // if (input==NULL || output1==NULL || output2==NULL) {
- //   flagerror(MEMORY_ALLOCATION_ERROR);
- //   while(1);
- // }
+  if (input==NULL || output1==NULL || output2==NULL) {
+    flagerror(MEMORY_ALLOCATION_ERROR);
+    while(1);
+  }
   
   /*
    * Infinite Loop to process the data stream, "nsamp" samples at a time

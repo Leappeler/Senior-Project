@@ -40,7 +40,7 @@ int main(void)
    */
 
   int nsamp, i, index = 0, delay;
-  float *input, *output1, *output2, *history, dval;
+  float *input1, *output1, *output2, *history, dval, *input2;
   static int button_count = 0;
   char outstr[100];
  
@@ -49,19 +49,20 @@ int main(void)
    * Initializes the board to use one input in, two out, and use a 
    * sampling frequency of 50ksps
    */
-  initialize(FS_50K, MONO_IN, STEREO_OUT);
+  initialize(FS_50K, STEREO_IN, STEREO_OUT);
   
   /*
    * Allocate Required Memory
    */
   nsamp = getblocksize();
 	
-  input = (float *)malloc(sizeof(float)*nsamp);
+  input1 = (float *)malloc(sizeof(float)*nsamp);
+  input2 = (float *)malloc(sizeof(float)*nsamp);
   output1 = (float *)malloc(sizeof(float)*nsamp);
   output2 = (float *)malloc(sizeof(float)*nsamp);
   history = (float *)malloc(sizeof(float)*12000);
 
-  if (input==NULL || output1==NULL || output2==NULL || history == NULL) {
+  if (input1==NULL || output1==NULL || output2==NULL || history == NULL || input2 == NULL) {
     flagerror(MEMORY_ALLOCATION_ERROR);
     while(1);
   }
@@ -78,22 +79,21 @@ int main(void)
      *   getblock() will wait until the input buffer is filled...  On return
      *   we work on the new data buffer.
      */
-    getblock(input);	// Wait here until the input buffer is filled... Then process	
+    getblockstereo(input1, input2);	// Wait here until the input buffer is filled... Then process	
 
     /*
      * signal processing code to calculate the required output buffers
      */
     
-    DIGITAL_IO_SET(); 	// Use a scope on PC4 to measure execution time
     for (i=0; i<nsamp; i++) {
 
       delay = 15;
-      timekeeper(history, input[i], &index, delay, &dval);
-      output1[i] = input[i];
-      output2[i] = dval;
-      //output2[i] = input[i];
-    }  
-    DIGITAL_IO_RESET();	// (falling edge....  done processing data )
+      timekeeper(history, input1[i], &index, delay, &dval);
+      // Added half each signal because adc reads -1 - 1. Adding both signals
+      //Throws out of bounds and fun things happen. This makes dac output 0 - 3 volts.
+      output1[i] = (input1[i]/2) + (dval/2);
+      output2[i] = input2[0];
+    } 
     
     /*
      * pass the processed working buffer back for DAC output
@@ -103,7 +103,8 @@ int main(void)
     for (i = 0; i  < nsamp; i++){
       output1[i] = 0;
       output2[i] = 0;
-      input[i] = 0;  
+      input1[i] = 0;
+      input2[i] = 0; 
     
     }
   }
@@ -139,6 +140,15 @@ int timekeeper(float *a, float val, int *hindex, int delay, float* k)
 
   a[*hindex] = val;
   *hindex += 1;
+
+  if (*hindex < 0) {
+    *hindex += 12000;
+  }
+
+  //Takes care of null case
+  if (*hindex == 12000){
+    *hindex = 0;
+  }
 
   *k = a[dindex];
   return 0;
