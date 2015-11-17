@@ -29,6 +29,7 @@
 
 // Personal note: See Arraypractice.c for help if you get confused.
 int timekeeper(float* a, float val, int *hindex, int delay, float* k);
+int changeRate(int* increment);
 
 
 int main(void)
@@ -50,6 +51,9 @@ int main(void)
    * sampling frequency of 50ksps
    */
   initialize(FS_50K, STEREO_IN, STEREO_OUT);
+  BSP_LED_Init(LED3); //Amber
+  BSP_LED_Init(LED6); //Blue
+  // Other 2 led's are init'ed by default
   
   /*
    * Allocate Required Memory
@@ -95,10 +99,10 @@ int main(void)
       timekeeper(history, input1[i], &index, delay, &dval);
       // Added half each signal because adc reads -1 - 1. Adding both signals
       //Throws out of bounds and fun things happen. This makes dac output 0 - 3 volts.
-      //output1[i] = (input1[i]/2) + (dval/2);
+      output1[i] = (input1[i]/2) + (dval/2);
       //output2[i] = input2[0];
-      output1[i] = input1[i];
-      output2[i] = dval;
+      //output1[i] = input1[i];
+      //output2[i] = dval;
     } 
     
     /*
@@ -110,13 +114,16 @@ int main(void)
     delay += increment;
 
     //Setting upper limit
-    if (((float) delay) > ((input1[0] + 1) * 50) + 50){
+    if (((float) delay) > ((input2[0] + 1) * 50) + 50){
       increment = -increment;
+      DIGITAL_IO_RESET();
     }
 
-    //Setting upper limit
+    //Setting lower limit
     if (delay < 5){
       increment = -increment;
+      DIGITAL_IO_SET();
+
     }
 
 
@@ -129,6 +136,11 @@ int main(void)
     
     }
 
+    // If the button is pressed, change increment
+    if(UserButtonPressed == Button_Pressed){
+      changeRate(&increment);
+      UserButtonPressed = Button_Ready;
+    }
 
   }
 }
@@ -174,5 +186,39 @@ int timekeeper(float *a, float val, int *hindex, int delay, float* k)
   }
 
   *k = a[dindex];
+  return 0;
+}
+
+
+
+int changeRate(int* increment)
+{
+  switch(*increment){
+
+    case 1:
+      *increment = 2;
+      BSP_LED_Off(LED4);  // Green off
+      BSP_LED_On(LED3);   // Amber on
+      break;
+
+    case 2:
+      *increment = 5;
+      BSP_LED_Off(LED3);  //Amber off
+      BSP_LED_On(LED5);   //Red on
+      break;
+
+    case 5:
+      *increment = 10;
+      BSP_LED_Off(LED5);  //Red off
+      BSP_LED_On(LED6);   //Blue on
+      break;
+
+    case 10:
+      *increment = 1;
+      BSP_LED_Off(LED6);
+      BSP_LED_On(LED4);
+      break;
+  }
+
   return 0;
 }
