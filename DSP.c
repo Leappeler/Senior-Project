@@ -100,7 +100,7 @@ int main(void)
       // Added half each signal because adc reads -1 - 1. Adding both signals
       //Throws out of bounds and fun things happen. This makes dac output 0 - 3 volts.
       output1[i] = (input1[i]/2) + (dval/2);
-      //output2[i] = input2[0];
+      output2[i] = input2[0];
       //output1[i] = input1[i];
       //output2[i] = dval;
     } 

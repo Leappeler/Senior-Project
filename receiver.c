@@ -23,7 +23,7 @@ All text above, and the splash screen must be included in any redistribution
 
 
 // TODO
-// Add comments
+// Format to make it look pretty
 
 
 
@@ -50,6 +50,7 @@ int b = 3;          	// Pin for Flange
 int c = 4;          	// Pin for both effects
 int d = 5;          	// Relay D
 int e = 6;          	// Relay E
+int f = 7;				// Relay F
 int fl = 0;         	// Flag variable
 char character = '\0';	// Used when reading in data
 String effect = "";		// Stores state of device
@@ -73,7 +74,7 @@ void setup()   {
     pinMode(c, OUTPUT);
     pinMode(d, OUTPUT);
     pinMode(e, OUTPUT);
-
+    pinMode(f, OUTPUT);
 
     // Set all relays to open when starting out
     // The relays are active low. Set pins high to turn them off.
@@ -82,6 +83,7 @@ void setup()   {
     digitalWrite(c, OPEN);
     digitalWrite(d, OPEN);
     digitalWrite(e, OPEN);
+    digitalWrite(f, OPEN);
 
     // Clear the display
     display.clearDisplay();
@@ -139,6 +141,7 @@ void loop() {
 		digitalWrite(c, OPEN);
 		digitalWrite(d, OPEN);
 		digitalWrite(e, CLOSED);
+		digitalWrite(f, OPEN);
     
 		// Prints back effect
 		if(fl == 0){    
@@ -168,6 +171,7 @@ void loop() {
     digitalWrite(c, OPEN);
     digitalWrite(d, OPEN);
     digitalWrite(e, OPEN);
+    digitalWrite(f, CLOSED);
     
     // Prints back active effect
     if(fl == 0){    
@@ -197,6 +201,7 @@ void loop() {
     digitalWrite(c, CLOSED);
     digitalWrite(d, OPEN);
     digitalWrite(e, OPEN);
+    digitalWrite(f, CLOSED);
     
     // Prints back active effects
     if(fl == 0){    
@@ -226,6 +231,7 @@ void loop() {
     digitalWrite(c, OPEN);
     digitalWrite(d, CLOSED);
     digitalWrite(e, OPEN);
+    digitalWrite(f, OPEN);
     
     // Print back active effects
     if(fl == 0){    
