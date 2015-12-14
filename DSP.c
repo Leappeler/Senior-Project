@@ -37,19 +37,16 @@ int main(void)
 
   /*
    * Declares here
-   * Add input1 and input2 when doing final. For now just make the delay work.
    */
 
   int nsamp, i, index = 0, delay, increment;
   float *input1, *output1, *output2, *history, dval, *input2;
-  static int button_count = 0;
-  char outstr[100];
- 
 
   /*
    * Initializes the board to use one input in, two out, and use a 
    * sampling frequency of 50ksps
    */
+
   initialize(FS_50K, STEREO_IN, STEREO_OUT);
   BSP_LED_Init(LED3); //Amber
   BSP_LED_Init(LED6); //Blue
@@ -58,6 +55,7 @@ int main(void)
   /*
    * Allocate Required Memory
    */
+
   nsamp = getblocksize();
 	
   input1 = (float *)malloc(sizeof(float)*nsamp);
@@ -98,7 +96,7 @@ int main(void)
     
       // Added half each signal because adc reads -1 - 1. Adding both signals
       //Throws out of bounds and fun things happen. This makes dac output 0 - 3 volts.
-      output1[i] = (input1[i]/2) + (dval/2);
+      output1[i] = ((input1[i]/2) + (dval/2));
       output2[i] = input2[0];
       //output1[i] = input1[i];
       //output2[i] = dval;
