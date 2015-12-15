@@ -3,7 +3,7 @@
  * 
  * This program will be on the board that handles the FLANGE effect.
  * The two ADC's will handle reading in a pot and the input signal.
- * The two DAC's will output the flanged input signal and just what is added to the input signal.
+ * The two DAC's will output the flanged input signal and the reading of input2[0]
  * The second part of that will be done much for curiosity. 
  */
 
@@ -77,13 +77,11 @@ int main(void)
   delay = 5;
   increment = 1;
   /*
-   * Infinite Loop to process the data stream, "nsamp" samples at a time
+   * Infinite Loop to process the data stream, "nsamp" samples at a time (100)
    */
   while(1){
     /*
-     * Ask for a block of ADC samples to be put into the working buffer
-     *   getblock() will wait until the input buffer is filled...  On return
-     *   we work on the new data buffer.
+     *  Fetches a block of input values from ADC's. 
      */
     getblockstereo(input1, input2);	// Wait here until the input buffer is filled... Then process	
 
@@ -98,12 +96,12 @@ int main(void)
       //Throws out of bounds and fun things happen. This makes dac output 0 - 3 volts.
       output1[i] = ((input1[i]/2) + (dval/2));
       output2[i] = input2[0];
-      //output1[i] = input1[i];
-      //output2[i] = dval;
+      //output1[i] = input1[i];		// Outputs input signal with no modifications. 
+      //output2[i] = dval;			// Outputs delayed wave. 
     } 
     
     /*
-     * pass the processed working buffer back for DAC output
+     * Have DAC send out signal
      */
     putblockstereo(output1, output2);
 
