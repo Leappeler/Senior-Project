@@ -46,8 +46,8 @@ int main(void)
 	 */
 
 	initialize(FS_50K, STEREO_IN, STEREO_OUT);
-	BSP_LED_Init(LED3); //Amber
-	BSP_LED_Init(LED6); //Blue
+	BSP_LED_Init(LED3); /* Amber */
+	BSP_LED_Init(LED6); /* Blue */
 	/* Other 2 led's are init'ed by default */
   
 	/*
@@ -102,7 +102,7 @@ int main(void)
 		 
 		output1[i] = ((input1[i]/2) + (dval/2));
 		output2[i] = input2[0];
-		//output1[i] = input1[i];		/* Outputs input signal with no modifications. */
+		/* output1[i] = input1[i];		/* Outputs input signal with no modifications. */
 		/* output2[i] = dval;			/* Outputs delayed wave. */ 
     } 
     
@@ -141,6 +141,7 @@ int main(void)
 			DIGITAL_IO_SET();
 		}
     } else {
+		
 		/*
 		 * Min .5ms delay
 		 * Max 500ms delay
@@ -228,8 +229,8 @@ int changeRate(int* increment, int* delay)
 		 */
 		case 1:
 			*increment = 2;
-			BSP_LED_Off(LED4);  // Green off
-			BSP_LED_On(LED3);   // Amber on
+			BSP_LED_Off(LED4);  /* Green off */
+			BSP_LED_On(LED3);   /* Amber on */
 			break;
 		
 		/*
@@ -237,8 +238,8 @@ int changeRate(int* increment, int* delay)
 		 */
 		case 2:
 			*increment = 5;
-			BSP_LED_Off(LED3);  //Amber off
-			BSP_LED_On(LED5);   //Red on
+			BSP_LED_Off(LED3);  /* Amber off */
+			BSP_LED_On(LED5);   /* Red on */
 			break;
 		
 		/*
@@ -246,8 +247,8 @@ int changeRate(int* increment, int* delay)
 		 */
 		case 5:
 			*increment = 0;
-			BSP_LED_Off(LED5);  //Red off
-			BSP_LED_On(LED6);   //Blue on
+			BSP_LED_Off(LED5);  /* Red off */
+			BSP_LED_On(LED6);   /* Blue on */
 			break;
 		
 		/*
